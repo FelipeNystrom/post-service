@@ -1,0 +1,21 @@
+{
+  "name": "post-service",
+  "version": "1.0.0",
+  "description": "crud service for posts",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "NODE_ENV=development nodemon -r dotenv/config server.js",
+    "start": "nodemon server.js",
+    "debug": "nodemon --inspect -r dotenv/config server.js"
+  },
+  "author": "FelipeNystrom <andre.felipe.nystrom@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.4",
+    "pg-promise": "^8.6.2"
+  },
+  "devDependencies": {
+    "dotenv": "^6.2.0"
+  }
+}
