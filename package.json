@@ -14,7 +14,8 @@
   "dependencies": {
     "express": "^4.16.4",
     "express-promise-router": "^3.0.3",
-    "pg-promise": "^8.6.2"
+    "pg-promise": "^8.6.2",
+    "sanitize": "^2.1.0"
   },
   "devDependencies": {
     "dotenv": "^6.2.0"
