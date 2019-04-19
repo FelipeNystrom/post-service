@@ -1,11 +1,26 @@
 const Router = require('express-promise-router');
 const router = new Router();
+const kafka = require('kafka-node');
+const Producer = kafka.Producer;
+const Client = kafka.KafkaClient;
 const {
   getAllPosts,
   getAllPostsByAuthor,
   updatePostWithId,
   deletePostWithId
 } = require('../_queries');
+
+const client = new Client();
+const producer = new Producer(client, { requireAcks: 1 });
+
+producer.on('ready', () => {
+  console.log('kafka producer is ready');
+});
+
+producer.on('error', err => {
+  console.log('kafka producer has an error: ');
+  console.error(err);
+});
 
 module.exports = router;
 
@@ -26,8 +41,22 @@ router.post('/by-author', async (req, res) => {
   }
 
   const {
-    body: { id }
+    body: { author }
   } = req;
+
+  const payload = [
+    { topic: 'author', messages: JSON.stringify(author), partition: 0 }
+  ];
+
+  producer.send(payload, (err, data) => {
+    debugger;
+    if (err) {
+      debugger;
+    }
+
+    res.json(data);
+  });
+
   try {
     const allPostByAuthor = await getAllPostsByAuthor(id);
 
