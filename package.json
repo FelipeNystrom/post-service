@@ -15,7 +15,6 @@
   "dependencies": {
     "express": "^4.16.4",
     "express-promise-router": "^3.0.3",
-    "kafka-node": "^4.1.1",
     "pg-promise": "^8.6.2",
     "sanitize": "^2.1.0"
   },
