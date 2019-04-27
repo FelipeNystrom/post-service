@@ -1,7 +1,7 @@
 const Router = require('express-promise-router');
 const router = new Router();
 const kafka = require('kafka-node');
-const Producer = kafka.Producer;
+const HighLevelProducer = kafka.HighLevelProducer;
 const Client = kafka.KafkaClient;
 const {
   getAllPosts,
@@ -10,8 +10,24 @@ const {
   deletePostWithId
 } = require('../_queries');
 
-const client = new Client();
-const producer = new Producer(client, { requireAcks: 1 });
+const client = new Client({ kafkaHost: 'kafka:9092' });
+const producer = new HighLevelProducer(client);
+
+// const topicsToCreate = [
+//   {
+//     topic: 'author'
+//   }
+// ];
+
+// client.createTopics(topicsToCreate, (err, result) => {
+//   if (err) {
+//     console.log('Could not create topics: ');
+//     console.log(err);
+//   } else {
+//     console.log('topics created succefully on broker: ');
+//     console.log(result);
+//   }
+// });
 
 producer.on('ready', () => {
   console.log('kafka producer is ready');
@@ -24,12 +40,14 @@ producer.on('error', err => {
 
 module.exports = router;
 
-router.get('/all', async (_, res) => {
+router.get('/all', async (req, res) => {
   try {
+    console.log(getAllPosts);
     const allPosts = await getAllPosts();
-    res.send(allPosts);
+    console.log(allPosts);
+    return res.json(allPosts);
   } catch (error) {
-    res.status(500).send({ error: `Error from server ${error}` });
+    return res.status(500).json({ error: `Error from server ${error}` });
   }
 });
 
@@ -41,7 +59,7 @@ router.post('/by-author', async (req, res) => {
   }
 
   const {
-    body: { author }
+    body: { author, id }
   } = req;
 
   const payload = [
@@ -49,6 +67,7 @@ router.post('/by-author', async (req, res) => {
   ];
 
   producer.send(payload, (err, data) => {
+    console.log(err, data);
     debugger;
     if (err) {
       debugger;
@@ -59,7 +78,8 @@ router.post('/by-author', async (req, res) => {
 
   try {
     const allPostByAuthor = await getAllPostsByAuthor(id);
-
+    debugger;
+    console.log(allPostsByAuthor);
     if (!allPostByAuthor[0]) {
       return res
         .status(404)
