@@ -1,42 +1,11 @@
 const Router = require('express-promise-router');
 const router = new Router();
-const kafka = require('kafka-node');
-const HighLevelProducer = kafka.HighLevelProducer;
-const Client = kafka.KafkaClient;
 const {
   getAllPosts,
   getAllPostsByAuthor,
   updatePostWithId,
   deletePostWithId
 } = require('../_queries');
-
-const client = new Client({ kafkaHost: 'kafka:9092' });
-const producer = new HighLevelProducer(client);
-
-// const topicsToCreate = [
-//   {
-//     topic: 'author'
-//   }
-// ];
-
-// client.createTopics(topicsToCreate, (err, result) => {
-//   if (err) {
-//     console.log('Could not create topics: ');
-//     console.log(err);
-//   } else {
-//     console.log('topics created succefully on broker: ');
-//     console.log(result);
-//   }
-// });
-
-producer.on('ready', () => {
-  console.log('kafka producer is ready');
-});
-
-producer.on('error', err => {
-  console.log('kafka producer has an error: ');
-  console.error(err);
-});
 
 module.exports = router;
 
@@ -57,24 +26,6 @@ router.post('/by-author', async (req, res) => {
       .status(400)
       .send({ error: 'Could not find id with value in request body' });
   }
-
-  const {
-    body: { author, id }
-  } = req;
-
-  const payload = [
-    { topic: 'author', messages: JSON.stringify(author), partition: 0 }
-  ];
-
-  producer.send(payload, (err, data) => {
-    console.log(err, data);
-    debugger;
-    if (err) {
-      debugger;
-    }
-
-    res.json(data);
-  });
 
   try {
     const allPostByAuthor = await getAllPostsByAuthor(id);
