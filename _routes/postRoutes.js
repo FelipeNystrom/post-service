@@ -1,16 +1,11 @@
 const Router = require('express-promise-router');
 const router = new Router();
-
 const {
   getAllPosts,
   getAllPostsByAuthor,
   updatePostWithId,
   deletePostWithId
 } = require('../_queries');
-
-// producer.on('ready', () => {
-//   console.log('kafka producer is ready');
-// });
 
 module.exports = router;
 
@@ -39,17 +34,16 @@ router.post('/by-author', async (req, res) => {
   } = req;
   debugger;
   try {
-    const payload = [
-      { topic: 'author', messages: JSON.stringify(author), partition: 0 }
-    ];
+    await producer.connect();
 
-    producer.send(payload, (err, data) => {
-      console.log(err, data);
-      debugger;
-      if (err) {
-        debugger;
-      }
+    const sentMessage = await producer.send({
+      topic: 'author',
+      messages: [{ value: JSON.stringify(author) }],
+      acks: 1
     });
+
+    producer.disconnect();
+
     debugger;
     const allPostByAuthor = await getAllPostsByAuthor(id);
     debugger;

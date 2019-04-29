@@ -1,20 +1,14 @@
 const express = require('express');
 const sanitize = require('sanitize');
-const kafka = require('kafka-node');
-const HighLevelProducer = kafka.HighLevelProducer;
-const Client = kafka.KafkaClient;
-const client = new Client({ kafkaHost: 'kafka:9092' });
-const producer = new HighLevelProducer(client);
-const Consumer = kafka.Consumer;
+const { Kafka } = require('kafkajs');
 
-const topics = [{ topic: 'author', partition: 0 }];
-
-const consumer = new Consumer(client, topics);
+const kafka = new Kafka({
+  clientId: 'postService-test-producer',
+  brokers: ['kafka:9092']
+});
 
 const kafkaInit = (req, res, next) => {
-  req.producer = producer;
-  req.client = client;
-  debugger;
+  req.producer = kafka.producer();
   next();
 };
 

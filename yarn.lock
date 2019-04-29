@@ -1169,6 +1169,13 @@ kafka-node@^4.1.1:
   optionalDependencies:
     snappy "^6.0.1"
 
+kafkajs@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/kafkajs/-/kafkajs-1.7.0.tgz#3154cc54248ad042dfe7acc94bf8a6a7c037e5be"
+  integrity sha512-tYqC9KDoxnWXlppr4mF3SHy/pZwrr8HLqUi4xokxpRMTq+KaVo+nMowhtowm2bWdKHak3/jT11k8jLBTpmbn6w==
+  dependencies:
+    long "^4.0.0"
+
 kind-of@^3.0.2, kind-of@^3.0.3, kind-of@^3.2.0:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-3.2.2.tgz#31ea21a734bab9bbb0f32466d893aea51e4a3c64"
@@ -1214,6 +1221,11 @@ long@1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/long/-/long-1.1.2.tgz#eaef5951ca7551d96926b82da242db9d6b28fb53"
   integrity sha1-6u9ZUcp1UdlpJrgtokLbnWso+1M=
+
+long@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
+  integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
 lowercase-keys@^1.0.0:
   version "1.0.1"
