@@ -30,31 +30,55 @@ router.post('/by-author', async (req, res) => {
 
   const {
     body: { author },
-    producer
+    producer,
+    consumer
   } = req;
+
+  let fetchedAuthorInfo;
+
   debugger;
   try {
+    await consumer.connect();
     await producer.connect();
 
-    const sentMessage = await producer.send({
+    await consumer.subscribe({ topic: 'author_reply' });
+
+    await producer.send({
       topic: 'author',
-      messages: [{ value: JSON.stringify(author) }],
+      messages: [{ value: Buffer.from(author) }],
       acks: 1
     });
 
     producer.disconnect();
 
+    await consumer.run({
+      eachMessage: async ({ topic, partition, message }) => {
+        const prefix = `${topic}[${partition} | ${message.offset}] / ${
+          message.timestamp
+        }`;
+        fetchedAuthorInfo = message.value.toString('utf8');
+        console.log(messageFromConsumer);
+        console.log(`- ${prefix} ${message.key}#${message.value}`);
+      }
+    });
     debugger;
-    const allPostByAuthor = await getAllPostsByAuthor(id);
-    debugger;
-    console.log(allPostsByAuthor);
-    if (!allPostByAuthor[0]) {
-      return res
-        .status(404)
-        .send({ message: 'There is no author with this id' });
+    if (fetchedAuthorInfo) {
+      const { id, username } = fetchedAuthorInfo;
+
+      debugger;
+      const allPostByAuthor = await getAllPostsByAuthor(id);
+      debugger;
+      console.log(allPostsByAuthor);
+      if (!allPostByAuthor[0]) {
+        return res
+          .status(404)
+          .send({ message: `${username} has not written any posts!` });
+      }
+
+      return res.send(allPostByAuthor);
     }
 
-    return res.send(allPostByAuthor);
+    throw new Error('Could not find an author with this name!');
   } catch (error) {
     return res.status(500).send({ error: `Error from server ${error}` });
   }
