@@ -36,10 +36,9 @@ router.post('/by-author', async (req, res) => {
 
   let fetchedAuthorInfo;
 
-  debugger;
   try {
-    await consumer.connect();
     await producer.connect();
+    console.log(consumer);
 
     await consumer.subscribe({ topic: 'author_reply' });
 
@@ -51,17 +50,21 @@ router.post('/by-author', async (req, res) => {
 
     producer.disconnect();
 
+    await consumer.connect();
+
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         const prefix = `${topic}[${partition} | ${message.offset}] / ${
           message.timestamp
         }`;
-        fetchedAuthorInfo = message.value.toString('utf8');
-        console.log(messageFromConsumer);
-        console.log(`- ${prefix} ${message.key}#${message.value}`);
+
+        fetchedAuthorInfo = JSON.parse(message.value.toString('utf8'));
+        debugger;
       }
     });
+
     debugger;
+
     if (fetchedAuthorInfo) {
       const { id, username } = fetchedAuthorInfo;
 
@@ -78,7 +81,7 @@ router.post('/by-author', async (req, res) => {
       return res.send(allPostByAuthor);
     }
 
-    throw new Error('Could not find an author with this name!');
+    // throw new Error('Could not find an author with this name!');
   } catch (error) {
     return res.status(500).send({ error: `Error from server ${error}` });
   }
