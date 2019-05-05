@@ -21,7 +21,6 @@ router.get('/all', async (req, res) => {
 });
 
 router.post('/by-author', async (req, res) => {
-  debugger;
   if (!req.body.author) {
     return res
       .status(400)
@@ -34,11 +33,8 @@ router.post('/by-author', async (req, res) => {
     consumer
   } = req;
 
-  let fetchedAuthorInfo;
-
   try {
     await producer.connect();
-    console.log(consumer);
 
     await consumer.subscribe({ topic: 'author_reply' });
 
@@ -52,36 +48,45 @@ router.post('/by-author', async (req, res) => {
 
     await consumer.connect();
 
-    await consumer.run({
-      eachMessage: async ({ topic, partition, message }) => {
-        const prefix = `${topic}[${partition} | ${message.offset}] / ${
-          message.timestamp
-        }`;
+    const getMessage = new Promise((resolve, _) => {
+      let fetchedAuthorInfo;
 
-        fetchedAuthorInfo = JSON.parse(message.value.toString('utf8'));
-        debugger;
-      }
+      consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+          // const prefix = `${topic}[${partition} | ${message.offset}] / ${
+          //   message.timestamp
+          // }`;
+
+          fetchedAuthorInfo = JSON.parse(message.value.toString('utf8'));
+
+          if (fetchedAuthorInfo) {
+            resolve(fetchedAuthorInfo);
+          } else {
+            reject();
+          }
+        }
+      });
     });
 
-    debugger;
+    const fetchedMessages = await getMessage;
 
-    if (fetchedAuthorInfo) {
-      const { id, username } = fetchedAuthorInfo;
+    consumer.disconnect();
 
-      debugger;
+    if (fetchedMessages) {
+      const { id, username } = fetchedMessages;
+
       const allPostByAuthor = await getAllPostsByAuthor(id);
-      debugger;
-      console.log(allPostsByAuthor);
+
       if (!allPostByAuthor[0]) {
         return res
           .status(404)
           .send({ message: `${username} has not written any posts!` });
       }
 
-      return res.send(allPostByAuthor);
+      return res.json(allPostByAuthor);
     }
 
-    // throw new Error('Could not find an author with this name!');
+    throw new Error('Could not find an author with this name!');
   } catch (error) {
     return res.status(500).send({ error: `Error from server ${error}` });
   }
