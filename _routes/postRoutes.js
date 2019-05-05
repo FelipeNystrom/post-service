@@ -9,35 +9,84 @@ const {
 
 module.exports = router;
 
-router.get('/all', async (_, res) => {
+router.get('/all', async (req, res) => {
   try {
+    console.log(getAllPosts);
     const allPosts = await getAllPosts();
-    res.send(allPosts);
+    console.log(allPosts);
+    return res.json(allPosts);
   } catch (error) {
-    res.status(500).send({ error: `Error from server ${error}` });
+    return res.status(500).json({ error: `Error from server ${error}` });
   }
 });
 
 router.post('/by-author', async (req, res) => {
-  if (!req.body.id) {
+  if (!req.body.author) {
     return res
       .status(400)
-      .send({ error: 'Could not find id with value in request body' });
+      .send({ error: 'Could not find author with value in request body' });
   }
 
   const {
-    body: { id }
+    body: { author },
+    producer,
+    consumer
   } = req;
-  try {
-    const allPostByAuthor = await getAllPostsByAuthor(id);
 
-    if (!allPostByAuthor[0]) {
-      return res
-        .status(404)
-        .send({ message: 'There is no author with this id' });
+  try {
+    await producer.connect();
+
+    await consumer.subscribe({ topic: 'author_reply' });
+
+    await producer.send({
+      topic: 'author',
+      messages: [{ value: Buffer.from(author) }],
+      acks: 1
+    });
+
+    producer.disconnect();
+
+    await consumer.connect();
+
+    const getMessage = new Promise((resolve, _) => {
+      let fetchedAuthorInfo;
+
+      consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+          // const prefix = `${topic}[${partition} | ${message.offset}] / ${
+          //   message.timestamp
+          // }`;
+
+          fetchedAuthorInfo = JSON.parse(message.value.toString('utf8'));
+
+          if (fetchedAuthorInfo) {
+            resolve(fetchedAuthorInfo);
+          } else {
+            reject();
+          }
+        }
+      });
+    });
+
+    const fetchedMessages = await getMessage;
+
+    consumer.disconnect();
+
+    if (fetchedMessages) {
+      const { id, username } = fetchedMessages;
+
+      const allPostByAuthor = await getAllPostsByAuthor(id);
+
+      if (!allPostByAuthor[0]) {
+        return res
+          .status(404)
+          .send({ message: `${username} has not written any posts!` });
+      }
+
+      return res.json(allPostByAuthor);
     }
 
-    return res.send(allPostByAuthor);
+    throw new Error('Could not find an author with this name!');
   } catch (error) {
     return res.status(500).send({ error: `Error from server ${error}` });
   }

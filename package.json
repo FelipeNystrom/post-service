@@ -7,17 +7,20 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "NODE_ENV=development nodemon -r dotenv/config server.js",
     "start": "nodemon server.js",
-    "debug": "nodemon --inspect -r dotenv/config server.js"
+    "debug": "nodemon --inspect -r dotenv/config server.js",
+    "docker-debug": "nodemon -L --inspect=0.0.0.0 server.js"
   },
   "author": "FelipeNystrom <andre.felipe.nystrom@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "express": "^4.16.4",
     "express-promise-router": "^3.0.3",
+    "kafkajs": "^1.7.0",
     "pg-promise": "^8.6.2",
     "sanitize": "^2.1.0"
   },
   "devDependencies": {
-    "dotenv": "^6.2.0"
+    "dotenv": "^6.2.0",
+    "nodemon": "^1.18.11"
   }
 }
