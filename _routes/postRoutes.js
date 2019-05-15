@@ -32,7 +32,6 @@ router.post('/by-author', async (req, res) => {
     producer,
     consumer
   } = req;
-
   try {
     await producer.connect();
 
@@ -47,7 +46,6 @@ router.post('/by-author', async (req, res) => {
     producer.disconnect();
 
     await consumer.connect();
-
     const getMessage = new Promise((resolve, _) => {
       let fetchedAuthorInfo;
 
@@ -56,9 +54,7 @@ router.post('/by-author', async (req, res) => {
           // const prefix = `${topic}[${partition} | ${message.offset}] / ${
           //   message.timestamp
           // }`;
-
           fetchedAuthorInfo = JSON.parse(message.value.toString('utf8'));
-
           if (fetchedAuthorInfo) {
             resolve(fetchedAuthorInfo);
           } else {
@@ -69,23 +65,18 @@ router.post('/by-author', async (req, res) => {
     });
 
     const fetchedMessages = await getMessage;
-
     consumer.disconnect();
-
     if (fetchedMessages) {
       const { id, username } = fetchedMessages;
 
       const allPostByAuthor = await getAllPostsByAuthor(id);
-
       if (!allPostByAuthor[0]) {
         return res
           .status(404)
           .send({ message: `${username} has not written any posts!` });
       }
-
       return res.json(allPostByAuthor);
     }
-
     throw new Error('Could not find an author with this name!');
   } catch (error) {
     return res.status(500).send({ error: `Error from server ${error}` });
@@ -104,8 +95,6 @@ router.put('/update', async (req, res) => {
       error: 'You have to provide id, title, body, author and images in body'
     });
   }
-
-  debugger;
 
   const {
     body: { id, title, body, author, images }
@@ -135,7 +124,6 @@ router.delete('/delete', async (req, res) => {
   } = req;
   try {
     const deletePost = await deletePostWithId(id);
-    debugger;
 
     if (!deletePost) {
       return res.status(404).send({
