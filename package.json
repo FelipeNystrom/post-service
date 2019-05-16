@@ -8,7 +8,7 @@
     "dev": "NODE_ENV=development nodemon -r dotenv/config server.js",
     "start": "nodemon server.js",
     "debug": "nodemon --inspect -r dotenv/config server.js",
-    "docker-debug": "nodemon -L --inspect=0.0.0.0 server.js"
+    "docker-debug": "nodemon -L --inspect=0.0.0.0 -r dotenv/config server.js"
   },
   "author": "FelipeNystrom <andre.felipe.nystrom@gmail.com>",
   "license": "MIT",
